@@ -7,3 +7,6 @@ class capability(attribute):
         self.retrievable = True
         self.reportable = False
         self.parameters = { "split":False }
+
+    def get_type(self):
+        return self.type

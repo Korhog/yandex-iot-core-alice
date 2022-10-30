@@ -10,7 +10,8 @@
             "request": "launch",
             "program": "function/src/app.py",
             "console": "integratedTerminal",
-            "justMyCode": true
+            "justMyCode": true,
+            
         }
     ]
 }

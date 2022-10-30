@@ -6,5 +6,9 @@ class NodeMCU(YandexIoTDevice):
         super().__init__(id, "NodeMCU", type)   
 
     @capability("devices.capabilities.on_off")
-    def on_off(self):
-        pass 
+    def on_off(self, engine, params):
+        value = params['value']
+        topic = "/krhg/{0}/commands".format(self.id)
+
+        engine.client.publish
+        engine.client.publish(topic, '1' if value else '0')
