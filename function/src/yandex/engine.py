@@ -86,14 +86,5 @@ class Engine:
 
     def __execute_capability(self, device, event_capability):
         capability, func = YandexIoTDeviceSerializer.get_capability(device, event_capability['type'])
-        func(device, self, event_capability['state'])
-
-        return {
-            'type': capability.type,
-            'state': {
-                'instance': event_capability['state']['instance'],
-                'action_result': {
-                    'status': "DONE"
-                }
-            }
-        }
+        return capability.build_responce(func(device, self, event_capability['state']))
+  
