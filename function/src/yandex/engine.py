@@ -14,6 +14,8 @@ class Engine:
 
 
     def handle(self, event, context):
+        self.client.publish('/krhg/device-iot-node-mcu-01/logs', str(event))
+
         request_type = event['request_type']
         if request_type == "discovery":
             return self.__handle_discovery(event, context)
@@ -66,7 +68,24 @@ class Engine:
 
 
     def __handle_query(self, event, context):
-        pass
+        results = list()
+
+        # execute actions
+        for event_device in self.__get_payload_devices(event):
+            if event_device['id'] in self.__devices:
+                device = self.__devices[event_device['id']]
+                capabilities = self.__get_devices_state(device)
+                results.append({
+                    'id': device.id,
+                    'capabilities': capabilities
+                })        
+
+        return {                
+            'request_id': self.__get_request_id(event),
+            'payload': {
+                'devices': results
+            }
+        }
 
 
     @staticmethod
@@ -83,8 +102,28 @@ class Engine:
     def __get_payload_devices_capabilites(device):
         return device['capabilities']
 
+    
+    @staticmethod
+    def __get_devices_state(device):
+        capabilities = list()
+        for capability in YandexIoTDeviceSerializer.get_capabilities(device):
+            capabilities.append({
+            'type': capability.type,
+            'state': capability.load(device)
+        }) 
+
+        return capabilities
+
 
     def __execute_capability(self, device, event_capability):
-        capability, func = YandexIoTDeviceSerializer.get_capability(device, event_capability['type'])
-        return capability.build_responce(func(device, self, event_capability['state']))
+        capability = YandexIoTDeviceSerializer.get_capability(device, event_capability['type'])    
+        return capability.execute(self, device, event_capability['state'])
+
+
+    def __execute_query(self, device, event_capability):
+        capability = YandexIoTDeviceSerializer.get_capability(device, event_capability['type'])
+        return {
+            'type': capability.type,
+            'state': capability.load(device)
+        }
   

@@ -10,16 +10,4 @@ class NodeMCU(YandexIoTDevice):
         value = params['value']
         topic = "/krhg/{0}/commands".format(self.id)
 
-        engine.client.publish
-        if engine.client.publish(topic, '1' if value else '0'):
-            return {
-                'instance': params['instance'],
-                'success': True
-            }
-        
-        return {
-            'instance': params['instance'],
-            'success': False
-        }
-
-    
+        return self.result(params, engine.client.publish(topic, '1' if value else '0'))

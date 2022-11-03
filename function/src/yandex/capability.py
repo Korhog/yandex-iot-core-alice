@@ -8,10 +8,16 @@ class capability(attribute):
         self.reportable = False
         self.parameters = { "split":False }
 
+
     def get_type(self):
         return self.type
 
-    def build_responce(self, result):
+    
+    def execute(self, engine, device, state):
+        result = self.func(device, engine, state)
+        if result['success']:
+            self.__save(device, state)
+ 
         return {
             'type': self.type,
             'state': {
@@ -21,6 +27,33 @@ class capability(attribute):
                 }
             }
         }
+
+
+    def load(self, device):
+        valiable_name = self.__get_capability_name()
+        if (device.__dict__.__contains__(valiable_name)):
+            return device.__dict__[valiable_name]
+        else:
+            state = self.__set_default()
+            device.__setattr__(valiable_name, state)   
+            return state     
+
+
+    def __save(self, device, state):
+        valiable_name = self.__get_capability_name()
+        if (device.__dict__.__contains__(valiable_name)):
+            device.__dict__[valiable_name] = state
+        else:
+            device.__setattr__(valiable_name, state)   
+
+
+    def __get_capability_name(self):
+        return "__" + self.type.replace(".", "_")
+
+
+    def __set_default(self):
+        pass
+
 
 class color_setting(capability):
     def __init__(self, min, max, **kwargs):

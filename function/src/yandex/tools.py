@@ -8,9 +8,17 @@ class YandexIoTDeviceSerializer:
             'id': device.id,
             'name': device.name,
             'type': device.type
-        }
-        
-        capabilities = YandexIoTDeviceSerializer.__get_capabilities(device)
+        }        
+
+        capabilities = list()
+        for capability in YandexIoTDeviceSerializer.get_capabilities(device):       
+            capabilities.append({
+                'type': capability.type,
+                'retrievable': capability.retrievable,
+                'reportable': capability.reportable,
+                'parameters': capability.parameters
+            })
+
         desc['capabilities'] = capabilities
         return desc
 
@@ -22,25 +30,20 @@ class YandexIoTDeviceSerializer:
             if YandexIoTDeviceSerializer.__has_attributes(func):
                 for attr in YandexIoTDeviceSerializer.__get_attributes(func):
                     if isinstance(attr, capability) and attr.type == type:
-                        return attr, func
+                        return attr
 
-        return None, None
+        return None
 
     
     @staticmethod
-    def __get_capabilities(device):
+    def get_capabilities(device):
         capabilities = list()
         methods = {funcname: func for funcname, func in device.__class__.__dict__.items() if hasattr(func, '__dict__')}.items()
         for funcname,func in methods:
             if YandexIoTDeviceSerializer.__has_attributes(func):
                 for attr in YandexIoTDeviceSerializer.__get_attributes(func):
                     if isinstance(attr, capability):
-                        capabilities.append({
-                            'type': attr.type,
-                            'retrievable': attr.retrievable,
-                            'reportable': attr.reportable,
-                            'parameters': attr.parameters
-                        })
+                        capabilities.append(attr)
 
         return capabilities    
 
