@@ -15,10 +15,8 @@ class capability(attribute):
     
     def execute(self, engine, device, state):
         result = self.func(device, engine, state)
-        if result['success']:
-            self.__save(device, state)
  
-        return {
+        return result['success'], {
             'type': self.type,
             'state': {
                 'instance': result['instance'],
@@ -26,33 +24,18 @@ class capability(attribute):
                     'status': "DONE" if result['success'] else "UNKNOWN_ERROR"
                 }
             }
-        }
+        }   
 
 
-    def load(self, device):
-        valiable_name = self.__get_capability_name()
-        if (device.__dict__.__contains__(valiable_name)):
-            return device.__dict__[valiable_name]
-        else:
-            state = self.__set_default()
-            device.__setattr__(valiable_name, state)   
-            return state     
-
-
-    def __save(self, device, state):
-        valiable_name = self.__get_capability_name()
-        if (device.__dict__.__contains__(valiable_name)):
-            device.__dict__[valiable_name] = state
-        else:
-            device.__setattr__(valiable_name, state)   
-
-
-    def __get_capability_name(self):
+    def get_capability_name(self):
         return "__" + self.type.replace(".", "_")
 
 
-    def __set_default(self):
-        pass
+    def get_default(self):
+        return  {
+            'instance': "on",
+            'value': False
+        }    
 
 
 class color_setting(capability):
@@ -66,3 +49,13 @@ class color_setting(capability):
                 'min': min
             }
         }
+
+    def get_default(self):
+        return  {
+            'instance': "hsv",
+            'value': {
+                'h': 125,
+                's': 25,
+                'v': 100
+            }
+        }   

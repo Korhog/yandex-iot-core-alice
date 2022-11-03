@@ -11,3 +11,7 @@ class NodeMCU(YandexIoTDevice):
         topic = "/krhg/{0}/commands".format(self.id)
 
         return self.result(params, engine.client.publish(topic, '1' if value else '0'))
+
+    @color_setting(2000, 6700)
+    def color_setting(self, engine, params):
+        return self.result(params, True)    
