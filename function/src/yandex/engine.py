@@ -5,8 +5,10 @@ from yandex.tools import YandexIoTDeviceSerializer
 class Engine:
     def __init__(self):
         self.__devices = dict()  
+        self.__device_states = dict()
         self.client = MQTT()
         self.client.connect()
+        self.client.publish('/krhg/engine/logs', "engine-created")
 
 
     def register_device(self, device: YandexIoTDevice):
@@ -14,8 +16,7 @@ class Engine:
 
 
     def handle(self, event, context):
-        self.client.publish('/krhg/device-iot-node-mcu-01/logs', str(event))
-
+        #self.client.publish('/krhg/engine/logs', str(event))
         request_type = event['request_type']
         if request_type == "discovery":
             return self.__handle_discovery(event, context)
@@ -42,8 +43,7 @@ class Engine:
 
     
     def __handle_action(self, event, context):
-        results = list()
-
+        devices = list()
         # execute actions
         for event_device in self.__get_payload_devices(event):
             if event_device['id'] in self.__devices:
@@ -54,36 +54,37 @@ class Engine:
                     result = self.__execute_capability(device, event_capability)     
                     capabilities.append(result)
 
-                results.append({
+                devices.append({
                     'id': device.id,
                     'capabilities': capabilities
-                })        
+                })       
 
+        
         return {                
             'request_id': self.__get_request_id(event),
             'payload': {
-                'devices': results
+                'devices': devices
             }
         }
 
 
     def __handle_query(self, event, context):
-        results = list()
+        devices = list()
 
         # execute actions
         for event_device in self.__get_payload_devices(event):
             if event_device['id'] in self.__devices:
                 device = self.__devices[event_device['id']]
                 capabilities = self.__get_devices_state(device)
-                results.append({
+                devices.append({
                     'id': device.id,
                     'capabilities': capabilities
-                })        
-
+                })   
+        
         return {                
             'request_id': self.__get_request_id(event),
             'payload': {
-                'devices': results
+                'devices': devices
             }
         }
 
@@ -103,27 +104,29 @@ class Engine:
         return device['capabilities']
 
     
-    @staticmethod
-    def __get_devices_state(device):
-        capabilities = list()
-        for capability in YandexIoTDeviceSerializer.get_capabilities(device):
-            capabilities.append({
-            'type': capability.type,
-            'state': capability.load(device)
-        }) 
-
-        return capabilities
+    def __get_devices_state(self, device):
+        return list(map(lambda x: {'type': x.type, 'state': self.__load_state(device, x)}, YandexIoTDeviceSerializer.get_capabilities(device)))
 
 
     def __execute_capability(self, device, event_capability):
-        capability = YandexIoTDeviceSerializer.get_capability(device, event_capability['type'])    
-        return capability.execute(self, device, event_capability['state'])
+        capability = YandexIoTDeviceSerializer.get_capability(device, event_capability['type']) 
+        result, state = capability.execute(self, device, event_capability['state'])
+        if result:
+            self.__save_state(device, capability, event_capability['state'])
+
+        return state
+            
+    
+    def __load_state(self, device, capability):
+        id = device.id + capability.get_capability_name()
+        if self.__device_states.__contains__(id):
+            return self.__device_states[id]
+
+        self.__device_states[id] = capability.get_default()
+        return self.__device_states[id]
 
 
-    def __execute_query(self, device, event_capability):
-        capability = YandexIoTDeviceSerializer.get_capability(device, event_capability['type'])
-        return {
-            'type': capability.type,
-            'state': capability.load(device)
-        }
+    def __save_state(self, device, capability, state):
+        id = device.id + capability.get_capability_name()
+        self.__device_states[id] = state
   
