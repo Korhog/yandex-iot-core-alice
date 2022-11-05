@@ -1,6 +1,8 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from yandex.engine import Engine
 from devices.node_mcu import NodeMCU
-
 
 engine = Engine()
 engine.register_device(NodeMCU("device-iot-node-mcu-01", "devices.types.other"))

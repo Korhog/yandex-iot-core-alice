@@ -1,17 +1,17 @@
+import os
 import ssl
 import paho.mqtt.client as mqtt
-from os import environ as env
 
 class MQTT:
     def __init__(self):  
         self.mqttc = mqtt.Client()
 
-        self.mqttc.username_pw_set(username=env['MQTT_USER'], password=env['MQTT_PASS'])
+        self.mqttc.username_pw_set(username=os.getenv('MQTT_USER'), password=os.getenv('MQTT_PASS'))
         self.mqttc.tls_set("mqtt/rootCA.crt", tls_version=ssl.PROTOCOL_TLSv1_2)
         self.mqttc.tls_insecure_set(True)
 
     def connect(self): 
-        self.mqttc.connect(env['MQTT_URL'], int(env['MQTT_PORT']))
+        self.mqttc.connect(os.getenv('MQTT_URL'), int(os.getenv('MQTT_PORT')))
 
     def publish(self, topic, message):
         tries = 5
