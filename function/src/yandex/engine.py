@@ -8,7 +8,7 @@ class Engine:
         self.__device_states = dict()
         self.client = MQTT()
         self.client.connect()
-        self.client.publish('/krhg/engine/logs', "engine-created")
+        self.client.publish('/yandex-iot-core/engine/logs', "engine-created")
 
 
     def register_device(self, device: YandexIoTDevice):

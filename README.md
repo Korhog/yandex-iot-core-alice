@@ -1,2 +1,28 @@
-# yandex-iot-core-alice
-Smart home Yandex backend  based on Yandex cloud function and ESP8266 (ESP32)
+# **yandex-iot-core-alice**
+Smart home Yandex backend based on Yandex cloud function and ESP8266 (ESP32)
+
+## **работа с ESP8266 через Yandex IoT Core MQTT**
+- - создание брокера в yandex cloud
+- - настройка скетча
+- - проверка через Yandex Cli
+
+## **Yandex Cloud Function**
+
+Для бекэнда навыка умного дома в этом проекте используется Yandex Cloud Funtion на языке Python.
+
+### **аторизация через Я.ID**
+
+В отличии от навыков Алисы, навыки умного дома требуют автоизацию по протоколу oauth 2.0. Для личного использвания можно воспользоваться [Я.ID](https://oauth.yandex.ru). 
+
+Переходим, логинимся и создаем новое приложение. Внизу, где раздел **Какие данные вам нужны?** ищем раздел **Умный дом Яндекса • iot** и ставим галочки
+
+```
+- Просмотр списка устройств умного дома
+- Управление устройствами умного дома
+```
+
+### **создание навыка умного дома**
+
+## **Tестирование**
+
+Тестируем
