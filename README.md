@@ -1,10 +1,29 @@
 # **yandex-iot-core-alice**
 Smart home Yandex backend based on Yandex cloud function and ESP8266 (ESP32)
 
+## **Настройка Arduino IDE**
+http://arduino.esp8266.com/stable/package_esp8266com_index.json
+
+
+
 ## **работа с ESP8266 через Yandex IoT Core MQTT**
-- - создание брокера в yandex cloud
-- - настройка скетча
-- - проверка через Yandex Cli
+- создание брокера в yandex cloud
+- настройка скетча
+
+
+### **Device CFG**
+В папке со скетчем для Arduino нужно создаться файл `cfg.h`, и в нем прописать нужные параметры
+```c
+// WiFi client settings.
+const char *_ssid = "";     // WiFi SSID.
+const char *_password = ""; // WiFi password.
+// Yandex CLOUD.
+const char *_username = "";         // Yandex IoT broker ID.
+const char *_devicepassword = "";   // Yandex IoT broker password.
+```
+
+- проверка через Yandex Cli
+
 
 ## **Yandex Cloud Function**
 
