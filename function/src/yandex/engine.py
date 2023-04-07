@@ -1,6 +1,7 @@
 from mqtt.client import MQTT
 from yandex.device import YandexIoTDevice
 from yandex.tools import YandexIoTDeviceSerializer
+from yandex.db import YDBContext
 
 class Engine:
     def __init__(self):
@@ -114,19 +115,13 @@ class Engine:
         if result:
             self.__save_state(device, capability, event_capability['state'])
 
-        return state
-            
+        return state            
     
     def __load_state(self, device, capability):
         id = device.id + capability.get_capability_name()
-        if self.__device_states.__contains__(id):
-            return self.__device_states[id]
-
-        self.__device_states[id] = capability.get_default()
-        return self.__device_states[id]
-
+        result = YDBContext.get_state(id)
+        return result if result is not None else capability.get_default()
 
     def __save_state(self, device, capability, state):
         id = device.id + capability.get_capability_name()
-        self.__device_states[id] = state
-  
+        YDBContext.update_state(id, state)

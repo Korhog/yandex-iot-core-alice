@@ -63,4 +63,4 @@ class YandexIoTDeviceSerializer:
             attributeList = method.__dict__[attribute.attributes_member_name]
             if isinstance(attributeList, list):
                 return attributeList
-        return list()  
+        return list()
