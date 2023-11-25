@@ -3,6 +3,9 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
 
+#define FASTLED_ESP8266_RAW_PIN_ORDER
+#include <FastLED.h>
+
 // WiFi client settings
 const char *ssid = _ssid;
 const char *password = _password;
@@ -11,10 +14,10 @@ bool connectdone = false;
 // Yandex CLOUD
 const char *mqttServer = "mqtt.cloud.yandex.net";
 int mqttPort = 8883;
-const char *username = _username;             // Yandex IoT broker ID 
-const char *devicepassword = _devicepassword;  // Yandex IoT broker password 
+const char *username = _username;                   // Yandex IoT broker ID 
+const char *devicepassword = _devicepassword;       // Yandex IoT broker password 
 // Setup IoT
-const String deviceId = "device-iot-node-mcu-01"; // unique device id for cloud function
+const String deviceId = "device-iot-node-mcu-01";   // unique device id for cloud function
 const String commands = String("/yandex-iot-core/" + deviceId + "/commands");
 
 const char *test_sr ="-----BEGIN CERTIFICATE-----\n \
@@ -38,6 +41,13 @@ RpXcOjthl0x9EsNWvxiVO94u3t18rSahjGFbUyde47DKXhE1YsWJsQ00scL8Wpv0\n\
 O9nHmi2mV9NLNhiOTTraoQfQPUKbPn5+6/1wLBoT3UgsocFZpxww\n\
 -----END CERTIFICATE-----";
 
+#define NUM_PIXELS 53
+#define LED_TYPE WS2812B
+#define DATA_PIN D5
+
+
+CRGB* m_buffer;
+CRGB m_current = CRGB::Green;
 
 WiFiClientSecure wclient; // wifi client
 PubSubClient client (wclient);
@@ -70,6 +80,13 @@ void setup() {
   Serial.print("IP Adress: \t");
   Serial.println(WiFi.localIP());
   wclient.setInsecure(); 
+
+  m_buffer = new CRGB[NUM_PIXELS];
+  FastLED.addLeds<WS2812B, DATA_PIN, GRB>(m_buffer, NUM_PIXELS);
+  FastLED.clear();
+  
+  FastLED.show();
+  FastLED.delay(25);
 }
 
 void reconnect() {
@@ -120,12 +137,68 @@ void callback(char* topic, byte* payload, unsigned int length) {
   for (int i=0;i<length;i++) {
     Serial.print((char)payload[i]);
   }
-
   Serial.println();
 
-  if ((char)payload[0] == '1') {
-    digitalWrite(BUILTIN_LED, LOW);   
-  } else {
-    digitalWrite(BUILTIN_LED, HIGH); 
+  int pos = 0;
+  String command = "";
+  for (int i=0;i<length;i++) {
+    if ((char)payload[i] == '=')
+      break;
+    command += (char)payload[i];
+    pos++;
   }
+
+  if (command == "1") {
+    digitalWrite(BUILTIN_LED, LOW);   
+    setColor(m_current);
+    return;
+  }
+
+  if (command == "0") {
+    digitalWrite(BUILTIN_LED, HIGH); 
+    setColor(CRGB::Black);
+    return;
+  }
+
+  if (command == "hsv") {
+    int idx = 0;
+    uint8_t* map = new uint8_t[3];
+    command = "";
+    for (int i=pos + 1;i<length;i++) {
+      if ((char)payload[i] == ':') {
+        map[idx] = (uint8_t)command.toInt();
+        command = "";
+        idx++;
+        continue;
+      }
+
+      command += (char)payload[i];  
+    }
+    map[idx] = (uint8_t)command.toInt();   
+  
+    m_current.setHSV(map[0],map[1],map[2]);    
+    //m_current.setHSV(map[0],100,100);    
+    setColor(m_current);
+    return;
+  }
+
+  if (command == "brightness") {
+    command = "";
+    for (int i=pos + 1;i<length;i++) {
+      command += (char)payload[i];
+    }
+    FastLED.setBrightness(command.toInt());
+    FastLED.show();
+    FastLED.delay(25); 
+    return;
+  }
+}
+
+void setColor(CRGB color) {
+  for (int i = 0; i < NUM_PIXELS; i++) {
+    m_buffer[i] = color; 
+  }
+  
+  FastLED.show();
+  FastLED.delay(25); 
 }

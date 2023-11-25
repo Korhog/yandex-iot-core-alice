@@ -58,4 +58,23 @@ class color_setting(capability):
                 's': 25,
                 'v': 100
             }
-        }   
+        } 
+
+class brightness(capability):
+    def __init__(self, **kwargs):
+        super().__init__("devices.capabilities.range", **kwargs)
+
+        self.parameters = {
+            'instance': "brightness",
+            'unit': "unit.percent",
+            'range': {
+                'min': 0,
+                'max': 100
+            }
+        }
+
+    def get_default(self):
+        return  {
+            'instance': "brightness",
+            'value': 100
+        }
