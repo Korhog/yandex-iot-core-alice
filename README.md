@@ -1,5 +1,5 @@
 # **yandex-iot-core-alice**
-Smart home Yandex backend based on Yandex cloud function and ESP8266 (ESP32)
+Smart home Yandex backend based on Yandex cloud function and ESP8266 + WS2812B (Arduino IDE + FastLED)
 
 # Yandex.Cloud
 
@@ -9,7 +9,7 @@ Smart home Yandex backend based on Yandex cloud function and ESP8266 (ESP32)
 
 на следующем экране подтверждаем ознакомление с условиями использования, и жмем **Войти**
 
-![img1](img/img2.png "Yandex.Cloud")
+![img2](img/img2.png "Yandex.Cloud")
 
 после этого создается наше облако
 
@@ -17,7 +17,7 @@ Smart home Yandex backend based on Yandex cloud function and ESP8266 (ESP32)
 
 Для работы в облаке Yandex необходим платежный аккаунт, по-этому сразу на главной видим баннер:
 
-![img1](img/img3.png "Yandex.Cloud")
+![img3](img/img3.png "Yandex.Cloud")
 
 В платежном аккаунте требуется привязать карту. Это формальность и данное решение будет полностью бесплатным. По-этому жмем **Создать аккаунт** и заполняем все необходимое. Для привязки карты потребуется списание 11 рублей, после привязки эти деньги вернутся на счет.
 
@@ -30,8 +30,7 @@ http://arduino.esp8266.com/stable/package_esp8266com_index.json
 
 
 ## работа с ESP8266 через Yandex IoT Core MQTT
-- создание брокера в yandex cloud
-- настройка скетча
+### настройка скетча
 
 
 ### Device CFG
@@ -50,8 +49,9 @@ const char *_devicepassword = "";   // Yandex IoT broker password.
 
 ## Yandex Cloud Function
 
-Для бекэнда навыка умного дома в этом проекте используется Yandex Cloud Funсtion на языке Python.
+Для бекэнда навыка умного дома в этом проекте используется Yandex Cloud Function на языке Python.
 
+# Навык умного дома
 ### авторизация через Я.ID
 
 В отличии от навыков Алисы, навыки умного дома требуют авторизацию по протоколу oauth 2.0. Для личного использования можно воспользоваться [Я.ID](https://oauth.yandex.ru). 
@@ -63,7 +63,7 @@ const char *_devicepassword = "";   // Yandex IoT broker password.
 - Управление устройствами умного дома
 ```
 
-### создание навыка умного дома
+### Яндекс.Диалоги
 
 Далее идем в консоль разработчика [Яндекс Диалоги](https://dialogs.yandex.ru/developer) 
 
@@ -79,7 +79,9 @@ const char *_devicepassword = "";   // Yandex IoT broker password.
 - URL авторизации: `https://oauth.yandex.ru/authorize`
 - URL для получения токена: `https://oauth.yandex.ru/token`
 
-### Tестирование
+![img4](img/img4.png "Yandex.Dialog")
+
+### Тестирование
 
 В этом разделе можно имитировать работу приложения. В верхнем правом углу жмем плюс и выбираем Устройства умного дома. В списке производителей будет только наш навык, добавляем его и жмем обновить список устройств.
 
