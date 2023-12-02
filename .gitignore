@@ -134,3 +134,7 @@ dmypy.json
 #vs
 .vs
 .vscode
+
+#kompas3d
+*.bak
+*.stl

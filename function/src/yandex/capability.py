@@ -43,7 +43,7 @@ class color_setting(capability):
         super().__init__("devices.capabilities.color_setting", **kwargs)
 
         self.parameters = {
-            'color_model':"hsv",
+            'color_model':"rgb",
             'temperature_k': {
                 'max': max,
                 'min': min
@@ -52,12 +52,8 @@ class color_setting(capability):
 
     def get_default(self):
         return  {
-            'instance': "hsv",
-            'value': {
-                'h': 125,
-                's': 25,
-                'v': 100
-            }
+            'instance': "rgb",
+            'value': 14210514
         } 
 
 class brightness(capability):
