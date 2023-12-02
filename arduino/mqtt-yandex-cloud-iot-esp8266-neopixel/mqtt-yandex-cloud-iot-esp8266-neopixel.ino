@@ -1,4 +1,5 @@
 #include "cfg.h"
+#include "utils.h"
 #include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
@@ -54,7 +55,7 @@ PubSubClient client (wclient);
 BearSSL::X509List x509(test_sr);
 
 uint32_t current_color = Adafruit_NeoPixel::Color(0,255,0);
-
+RGB m_current = RGB::FromRGB(255, 0, 0);
 
 void setup() {  
   pinMode(BUILTIN_LED, OUTPUT);
@@ -152,13 +153,13 @@ void callback(char* topic, byte* payload, unsigned int length) {
 
   if (command == "1") {
     digitalWrite(BUILTIN_LED, LOW);   
-    setColor(current_color);
+    setColor(RGB::Black(), m_current);
     return;
   }
 
   if (command == "0") {
     digitalWrite(BUILTIN_LED, HIGH); 
-    setColor(0);
+    setColor(m_current, RGB::Black());
     return;
   }
 
@@ -177,8 +178,9 @@ void callback(char* topic, byte* payload, unsigned int length) {
       command += (char)payload[i];  
     }
     map[idx] = (uint16_t)command.toInt();
-    current_color = Adafruit_NeoPixel::Color(map[0],map[1],map[2]);
-    setColor(current_color);
+    RGB color = RGB::FromRGB(map[0],map[1],map[2]);    
+    setColor(m_current, color);
+    m_current = color;
     return;
   }
 
@@ -194,10 +196,19 @@ void callback(char* topic, byte* payload, unsigned int length) {
   }
 }
 
-void setColor(uint32_t color) {
-  pixels.clear();
+void setColor(RGB from, RGB to) {
+  for (uint8_t i = 0; i < 99; i++) {
+      RGB step = Mix(from, to, i, 100);
+
+      for (int i = 0; i < NUM_PIXELS; i++) {
+        pixels.setPixelColor(i, step.r, step.g, step.b);
+      }
+      pixels.show();
+      delay(10);
+  }
+
   for (int i = 0; i < NUM_PIXELS; i++) {
-    pixels.setPixelColor(i, color);
+    pixels.setPixelColor(i, to.r, to.g, to.b);
   }
   pixels.show();
 }
