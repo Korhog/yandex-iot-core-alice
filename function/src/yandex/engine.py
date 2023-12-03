@@ -17,7 +17,6 @@ class Engine:
 
 
     def handle(self, event, context):
-        #self.client.publish('/krhg/engine/logs', str(event))
         request_type = event['request_type']
         if request_type == "discovery":
             return self.__handle_discovery(event, context)
@@ -34,6 +33,8 @@ class Engine:
         for device_id in self.__devices:
             devices.append(YandexIoTDeviceSerializer.serialize(self.__devices[device_id]))
 
+        print(devices)
+
         return {
             'request_id': self.__get_request_id(event),
             'payload': {
@@ -48,6 +49,8 @@ class Engine:
         # execute actions
         for event_device in self.__get_payload_devices(event):
             if event_device['id'] in self.__devices:
+                print(event_device)
+
                 device = self.__devices[event_device['id']]
                 capabilities = list()
 
@@ -124,4 +127,4 @@ class Engine:
 
     def __save_state(self, device, capability, state):
         id = device.id + capability.get_capability_name()
-        YDBContext.update_state(id, state)
+        YDBContext.update_state(id, device.id, state)
