@@ -9,3 +9,6 @@ class YandexIoTDevice:
             'instance': params['instance'],
             'success': success
         }
+    
+    def __topic__(self):
+        return "/yandex-iot-core/{0}/commands".format(self.id)

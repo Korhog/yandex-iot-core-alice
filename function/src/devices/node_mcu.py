@@ -1,6 +1,6 @@
 import math
 from yandex.device import YandexIoTDevice
-from yandex.capability import (on_off, capability, brightness, color_setting)
+from yandex.capability import (on_off, brightness, color_setting)
 
 def getRGB(value):
     if value <= 6700:
@@ -21,25 +21,28 @@ class NodeMCU(YandexIoTDevice):
     @on_off()
     def on_off(self, engine, params):
         value = params['value']
-        topic = "/yandex-iot-core/{0}/commands".format(self.id)
-
-        return self.result(params, engine.client.publish(topic, '1' if value else '0'))
+        return self.result(params, engine.client.publish(self.__topic__(), '1' if value else '0'))
 
     @color_setting(temperature_k=(2000, 6700), scenes=["alice"])
     def color_setting(self, engine, params):
-        value = params['value']
-        topic = "/yandex-iot-core/{0}/commands".format(self.id)         
-        
-        r,g,b = getRGB(value)
-        msg = "rgb={0}:{1}:{2}".format(r,g,b)
+        instance = params['instance']
+        value = params['value']   
+        msg = ""
 
-        return self.result(params, engine.client.publish(topic, msg))
+        if instance == "rgb":        
+            r,g,b = getRGB(value)
+            msg = "rgb={0}:{1}:{2}".format(r,g,b)
+
+        if instance == "scene":        
+            msg = "scene={0}".format(value)
+        
+        if instance == "temperature_k":        
+            msg = "rgb=255:255:255"   
+
+        return self.result(params, engine.client.publish(self.__topic__(), msg))
 
     @brightness()
     def brightness(self, engine, params):
         value = math.floor(params['value'] / 100 * 255)
-        topic = "/yandex-iot-core/{0}/commands".format(self.id)
-
         msg = "brightness={0}".format(value)
-
-        return self.result(params, engine.client.publish(topic, msg))
+        return self.result(params, engine.client.publish(self.__topic__(), msg))
